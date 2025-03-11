@@ -1631,6 +1631,10 @@ klasyfikacja</a>
 <li><a href="#podział-zbioru-danych" id="toc-podział-zbioru-danych"><span class="toc-section-number">1.1</span> Podział zbioru danych</a></li>
 <li><a href="#korelacja-zmiennych" id="toc-korelacja-zmiennych"><span class="toc-section-number">1.2</span> Korelacja zmiennych</a></li>
 </ul></li>
+<li><a href="#modele-regresji-liniowej" id="toc-modele-regresji-liniowej"><span class="toc-section-number">2</span> Modele regresji liniowej</a>
+<ul>
+<li><a href="#modele-podstawowe" id="toc-modele-podstawowe"><span class="toc-section-number">2.1</span> Modele podstawowe</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -1860,6 +1864,161 @@ razie stworzymy modele bez ‘residual.sugar’ i ‘alcohol’, żeby zobaczyć
 jakie wyniki wtedy dostaniemy.</p>
 <p>Zastosujemy również metodę składowych głównych (PCA), żeby porównać
 oba podejścia.</p>
+</div>
+</div>
+<div id="modele-regresji-liniowej" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Modele regresji
+liniowej</h1>
+<div id="modele-podstawowe" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Modele
+podstawowe</h2>
+<p>Stworzymy modele regresji liniowej zmiennej ‘quality’ względem,
+odpowiednio:</p>
+<ul>
+<li>wszystkich zmiennych występujących w próbce uczącej (full),</li>
+<li>wszystkich zmiennych występujących w próbce uczącej z wyrzuceniem
+zmiennej ‘residual.sugar’ (no sugar),</li>
+<li>wszystkich zmiennych występujących w próbce uczącej z wyrzuceniem
+zmiennej ‘alcohol’ (no alcohol),</li>
+<li>wszystkich zmiennych występujących w próbce uczącej z wyrzuceniem
+zmiennych ‘residual.sugar’ oraz ‘alcohol’ (no sugar, no alcohol).</li>
+</ul>
+<p>Tworzymy w tym celu funkcję, żeby zautomatyzować ten proces.</p>
+<pre class="r"><code>models &lt;&lt;- list()
+countM  = 0
+add_model = function(name, model, ispca){
+  models &lt;&lt;- append(models, list(name, model, ispca))
+  countM &lt;&lt;- countM + 1
+}
+get_name  = function(index){models[[index*3-3+1]]}
+get_model = function(index){models[[index*3-3+2]]}
+is_pca    = function(index){models[[index*3-3+3]]}
+
+add_model(&#39;full&#39;,                 lm(quality ~ .,                            data = lrn), FALSE)
+add_model(&#39;no sugar&#39;,             lm(quality ~ . - residual.sugar,           data = lrn), FALSE)
+add_model(&#39;no alcohol&#39;,           lm(quality ~ .                  - alcohol, data = lrn), FALSE)
+add_model(&#39;no sugar, no alcohol&#39;, lm(quality ~ . - residual.sugar - alcohol, data = lrn), FALSE)</code></pre>
+<p>Poniżej wyświetlamy podsumowanie każdego modelu w podanej wyżej
+kolejności.</p>
+<pre class="r"><code>for(i in 1:countM){
+  print(get_name(i))
+  print(summary(get_model(i)))
+}</code></pre>
+<pre><code>## [1] &quot;full&quot;
+## 
+## Call:
+## lm(formula = quality ~ ., data = lrn)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.4424 -0.4903 -0.0343  0.4565  2.4520 
+## 
+## Coefficients:
+##                        Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)           1.101e+02  2.304e+01   4.779 1.87e-06 ***
+## fixed.acidity         3.955e-02  2.752e-02   1.437    0.151    
+## volatile.acidity     -1.904e+00  1.576e-01 -12.085  &lt; 2e-16 ***
+## citric.acid           1.402e-01  1.302e-01   1.076    0.282    
+## residual.sugar        7.067e-02  9.747e-03   7.251 5.56e-13 ***
+## chlorides             1.601e-01  7.646e-01   0.209    0.834    
+## free.sulfur.dioxide   4.733e-03  1.205e-03   3.928 8.79e-05 ***
+## total.sulfur.dioxide -7.247e-04  5.193e-04  -1.396    0.163    
+## density              -1.101e+02  2.339e+01  -4.707 2.65e-06 ***
+## pH                    6.457e-01  1.424e-01   4.536 6.01e-06 ***
+## sulphates             5.512e-01  1.378e-01   3.999 6.55e-05 ***
+## alcohol               2.446e-01  3.013e-02   8.117 7.50e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.7422 on 2423 degrees of freedom
+## Multiple R-squared:  0.2916, Adjusted R-squared:  0.2884 
+## F-statistic: 90.68 on 11 and 2423 DF,  p-value: &lt; 2.2e-16
+## 
+## [1] &quot;no sugar&quot;
+## 
+## Call:
+## lm(formula = quality ~ . - residual.sugar, data = lrn)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.3757 -0.5003 -0.0251  0.4502  2.4930 
+## 
+## Coefficients:
+##                        Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)          -4.531e+01  8.537e+00  -5.307 1.21e-07 ***
+## fixed.acidity        -8.727e-02  2.147e-02  -4.064 4.97e-05 ***
+## volatile.acidity     -1.992e+00  1.588e-01 -12.549  &lt; 2e-16 ***
+## citric.acid           1.179e-01  1.316e-01   0.896   0.3704    
+## chlorides            -1.040e+00  7.544e-01  -1.378   0.1683    
+## free.sulfur.dioxide   6.298e-03  1.198e-03   5.258 1.59e-07 ***
+## total.sulfur.dioxide -1.008e-03  5.233e-04  -1.926   0.0542 .  
+## density               4.806e+01  8.533e+00   5.633 1.98e-08 ***
+## pH                    2.352e-02  1.148e-01   0.205   0.8376    
+## sulphates             3.055e-01  1.350e-01   2.263   0.0237 *  
+## alcohol               4.056e-01  2.057e-02  19.716  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.7501 on 2424 degrees of freedom
+## Multiple R-squared:  0.2762, Adjusted R-squared:  0.2733 
+## F-statistic: 92.52 on 10 and 2424 DF,  p-value: &lt; 2.2e-16
+## 
+## [1] &quot;no alcohol&quot;
+## 
+## Call:
+## lm(formula = quality ~ . - alcohol, data = lrn)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.4664 -0.4834 -0.0523  0.4578  5.3288 
+## 
+## Coefficients:
+##                        Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)           2.710e+02  1.190e+01  22.773  &lt; 2e-16 ***
+## fixed.acidity         1.599e-01  2.349e-02   6.807 1.25e-11 ***
+## volatile.acidity     -1.620e+00  1.557e-01 -10.408  &lt; 2e-16 ***
+## citric.acid           2.251e-01  1.316e-01   1.711  0.08718 .  
+## residual.sugar        1.290e-01  6.673e-03  19.331  &lt; 2e-16 ***
+## chlorides             1.788e-02  7.746e-01   0.023  0.98158    
+## free.sulfur.dioxide   3.853e-03  1.216e-03   3.168  0.00155 ** 
+## total.sulfur.dioxide -8.445e-04  5.260e-04  -1.606  0.10850    
+## density              -2.727e+02  1.224e+01 -22.275  &lt; 2e-16 ***
+## pH                    1.245e+00  1.233e-01  10.097  &lt; 2e-16 ***
+## sulphates             8.053e-01  1.360e-01   5.921 3.65e-09 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.7521 on 2424 degrees of freedom
+## Multiple R-squared:  0.2724, Adjusted R-squared:  0.2694 
+## F-statistic: 90.73 on 10 and 2424 DF,  p-value: &lt; 2.2e-16
+## 
+## [1] &quot;no sugar, no alcohol&quot;
+## 
+## Call:
+## lm(formula = quality ~ . - residual.sugar - alcohol, data = lrn)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.2628 -0.5514 -0.0178  0.4875  4.2115 
+## 
+## Coefficients:
+##                        Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)           7.322e+01  6.528e+00  11.217  &lt; 2e-16 ***
+## fixed.acidity        -3.025e-02  2.292e-02  -1.320 0.186913    
+## volatile.acidity     -1.225e+00  1.658e-01  -7.393 1.97e-13 ***
+## citric.acid           3.597e-01  1.411e-01   2.549 0.010865 *  
+## chlorides            -5.154e+00  7.808e-01  -6.601 4.99e-11 ***
+## free.sulfur.dioxide   7.792e-03  1.288e-03   6.052 1.66e-09 ***
+## total.sulfur.dioxide -2.293e-03  5.592e-04  -4.101 4.25e-05 ***
+## density              -6.836e+01  6.634e+00 -10.305  &lt; 2e-16 ***
+## pH                    3.356e-01  1.224e-01   2.741 0.006175 ** 
+## sulphates             4.922e-01  1.450e-01   3.393 0.000702 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.8078 on 2425 degrees of freedom
+## Multiple R-squared:  0.1602, Adjusted R-squared:  0.1571 
+## F-statistic: 51.39 on 9 and 2425 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 

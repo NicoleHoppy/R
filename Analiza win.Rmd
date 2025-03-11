@@ -141,3 +141,43 @@ Widzimy, że najbardziej skorelowaną zmienną, ze zmienną ‘quality’, jest 
 Warto też zauważyć, że mocną wzajemną korelację wykazują zmienne ‘density’ i ‘residual.sugar’ oraz zmienne ‘alcohol’ i ‘density’. W takim razie stworzymy modele bez ‘residual.sugar’ i ‘alcohol’, żeby zobaczyć, jakie wyniki wtedy dostaniemy.
 
 Zastosujemy również metodę składowych głównych (PCA), żeby porównać oba podejścia.
+
+
+# Modele regresji liniowej
+## Modele podstawowe
+
+Stworzymy modele regresji liniowej zmiennej ‘quality’ względem, odpowiednio:
+
+- wszystkich zmiennych występujących w próbce uczącej (full),
+- wszystkich zmiennych występujących w próbce uczącej z wyrzuceniem zmiennej ‘residual.sugar’ (no sugar),
+- wszystkich zmiennych występujących w próbce uczącej z wyrzuceniem zmiennej ‘alcohol’ (no alcohol),
+- wszystkich zmiennych występujących w próbce uczącej z wyrzuceniem zmiennych ‘residual.sugar’ oraz ‘alcohol’ (no sugar, no alcohol).
+
+Tworzymy w tym celu funkcję, żeby zautomatyzować ten proces.
+
+```{r}
+models <<- list()
+countM  = 0
+add_model = function(name, model, ispca){
+  models <<- append(models, list(name, model, ispca))
+  countM <<- countM + 1
+}
+get_name  = function(index){models[[index*3-3+1]]}
+get_model = function(index){models[[index*3-3+2]]}
+is_pca    = function(index){models[[index*3-3+3]]}
+
+add_model('full',                 lm(quality ~ .,                            data = lrn), FALSE)
+add_model('no sugar',             lm(quality ~ . - residual.sugar,           data = lrn), FALSE)
+add_model('no alcohol',           lm(quality ~ .                  - alcohol, data = lrn), FALSE)
+add_model('no sugar, no alcohol', lm(quality ~ . - residual.sugar - alcohol, data = lrn), FALSE)
+```
+
+Poniżej wyświetlamy podsumowanie każdego modelu w podanej wyżej kolejności.
+
+```{r}
+for(i in 1:countM){
+  print(get_name(i))
+  print(summary(get_model(i)))
+}
+```
+
