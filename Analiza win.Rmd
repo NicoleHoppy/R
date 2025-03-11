@@ -1,0 +1,143 @@
+---
+title: "Analiza win"
+output:
+  html_document:
+    df_print: paged
+    toc: true #włącza spis treści
+    #toc_float: true #umożliwia przewijany spis treści
+    number_sections: true #numeruje sekcje
+  pdf_document: default
+---
+
+
+Zbiór danych wykorzystany do poniższej analizy pochodzi ze strony [kaggle.com](https://www.kaggle.com/datasets/shelvigarg/wine-quality-dataset/data). Jest to zbiór zawierający dane o czerwonym oraz białym wariancie wina "Vinho Verde", pochodzącego z północy Portugalii.
+
+Celem niniejszej analizy jest zastosowanie regresji liniowej.
+
+Załadujemy na początek potrzebne biblioteki, żeby funkcje, które są wykorzystywane w projekcie, działały poprawnie.
+
+```{r,message = FALSE, warning = FALSE}
+library(car)
+library(corrplot)
+library(dplyr)
+library(faraway)
+library(lmtest)
+library(MASS)
+library(nortest)
+library(RColorBrewer)
+```
+
+# Dane - ich struktura oraz klasyfikacja
+
+Załadujmy plik winequalityN.csv oraz prześledźmy jego strukturę danych.
+
+```{r}
+wine <- read.csv("C:\\Users\\Nikola\\Documents\\Nikola Chmielewska\\R\\Datasets\\winequalityN.csv")
+str(wine)
+unique(wine$type)
+```
+Dokonajmy jeszcze objaśnienia zmiennych występujących w zbiorze danych.
+
+| Nazwa | Opis | 
+|--------|--------|
+| type | rodzaj wina (białe, czerwone) |
+| fixed.acidity | stała kwasowość |
+| volatile acidity | zmienna kwasowość |
+| citric acid | kwas cytrynowy |
+| residual sugar | resztowy cukier |
+| chlorides |	chlorki |
+| free sulfur dioxide | 	wolny dwutlenek siarki |
+| total sulfur dioxide | 	całkowity dwutlenek siarki |
+| density |	gęstość |
+| pH – potential of hydrogen | współczynnik kwasowości/zasadowości pH |
+| sulphates | siarczyny |
+| alcohol | alkohol |
+| quality |	jakość |
+
+Oraz, aby lepiej zrozumieć dane, zobaczmy ich podsumowanie:
+
+```{r}
+summary(wine)
+```
+
+Sprawdźmy jeszcze, czy w zbiorze wszystkie dane są podane:
+
+```{r}
+(sapply(wine, function(x) {sum(is.na(x))}))
+```
+Jak widać powyżej, nasza tabela zawiera wartości NA. Usuniemy zatem wiersze, które nie posiadają danych. Robimy to, ponieważ brak danych może obniżyć jakość późniejszej analizy danych.
+
+```{r}
+wine_clean <- na.omit(wine) #usuwa wiersze zawierające wartości NA
+```
+
+Wyświetlmy jeszcze raz nasz nowy zbiór danych z usuniętymi wartościami NA.
+
+```{r}
+(sapply(wine_clean, function(x) {sum(is.na(x))}))
+```
+
+Jak widzimy, w tej chwili żadna zmienna nie jest obarczona brakiem danych, więc nasz zbiór danych jest gotowy do obróbki.
+
+Jednocześnie w niniejszym zestawie danych zmienną zależną jest atrybut quality, a więc ocena jakości wina. Pozostałe zmienne są zmiennymi niezależnymi wpływającymi na końcową ocenę wina; są to również zmienne ilościowe. Natomiast zmienną objaśnianą ‘quality’ można potraktować zarówno jako zmienną ilościową oraz jako zmienną nominalną o uporządkowanych kategoriach (jakościową). 
+
+W niniejszej pracy atrybut quality potraktujemy jako zmienną ilościową, rozważając modele regresji liniowej. Jednak podczas tworzenia modelu proporcjonalnych szans, zmienną ‘quality’ potraktujemy jako zmienną jakościową. Warto w tym miejscu zaznaczyć, że w celu weryfikacji hipotez będziemy zakładać poziom istotności α=0,05.
+
+## Podział zbioru danych
+
+Podzielimy nasz zbiór danych na podstawie wariantu wina - białe i czerwone. Zrobimy osobną analizę dla każdego wariantu.
+
+```{r}
+white_wine <- subset(wine_clean, type == "white")
+red_wine <- subset(wine_clean, type == "red")
+```
+
+Oprócz tego usuniemy kolumny tekstowe, ponieważ tylko takie kolumny będą nam potrzebne do dlszej analizy.
+
+```{r}
+white_numeric <- white_wine[sapply(white_wine, is.numeric)]
+```
+
+
+Stworzymy teraz zmienne pomocnicze, które pomogą nam podzielić zbiór danych na 3 podzbiory.
+
+```{r}
+N <- nrow(white_numeric)
+I <- (1:N)
+```
+
+Teraz losujemy indeksy.
+
+```{r}
+set.seed(300)
+I_l <- sample.int(N, size = round(N/2)) #50% danych
+I_v <- sample(setdiff(I, I_l), size = round(N/4)) #25% danych
+I_t <- setdiff(setdiff(I, I_l), I_v) #25% danych
+```
+
+Przypiszmy im konkretne dane, dzieląc nasz wyjściowy zbiór danych na próbę uczącą, walidacyjną oraz testową o udziale procentowym, odpowiednio, 50%, 25% oraz 25% danych wyjściowych.
+
+```{r}
+lrn <- white_numeric[I_l,] #próba ucząca
+val <- white_numeric[I_v,] #próba walidacyjna
+tst <- white_numeric[I_t,] #próba testowa
+```
+
+W ten sposób podzieliliśmy zbiór danych na trzy podzbiory.
+
+## Korelacja zmiennych
+
+Zanim utworzymy model regresji liniowej, zobaczmy jak prezentuje się wykres korelacji poszczególnych zmiennych w naszej próbie uczącej.
+
+```{r}
+white_matrix <- cor(lrn)
+corrplot(white_matrix, type = "lower")
+```
+
+Wartość dodatnia oznacza, że wraz ze wzrostem jednej cechy, następuje wzrost drugiej. Wartość ujemna natomiast określa, że wraz ze wzrostem jednej, następuje spadek drugiej cechy. W takim razie wartości najbliżej krańców przedziału wskazują największą korelacje. Z drugiej strony wartości bliżej zera wskazują na brak powiązania zmiennych.
+
+Widzimy, że najbardziej skorelowaną zmienną, ze zmienną ‘quality’, jest ‘alcohol’ oraz ‘density’, gdzie są to zmienne odpowiednio skorelowane dodatnio oraz ujemnie.
+
+Warto też zauważyć, że mocną wzajemną korelację wykazują zmienne ‘density’ i ‘residual.sugar’ oraz zmienne ‘alcohol’ i ‘density’. W takim razie stworzymy modele bez ‘residual.sugar’ i ‘alcohol’, żeby zobaczyć, jakie wyniki wtedy dostaniemy.
+
+Zastosujemy również metodę składowych głównych (PCA), żeby porównać oba podejścia.
