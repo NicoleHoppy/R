@@ -181,3 +181,61 @@ for(i in 1:countM){
 }
 ```
 
+Już na pierwszy rzut oka widać, że ostatni model nie jest w żaden sposób konkurencyjny względem reszty modeli, biorąc pod uwagę chociażby skorygowany współczynnik determinacji, który jest nieporównywalnie mniejszy w stosunku do reszty modeli. Jednak w celu zweryfikowania, czy modele mniejsze są adekwatne, posłużymy się testem ANOVA.
+
+### ANOVA
+
+Nasz test statystyczny ma postać:
+
+- H<sub>0</sub>: mniejszy model jest adekwatny,
+- H<sub>1</sub>: mniejszy model nie jest adekwatny.
+
+```{r}
+for(i in 2:countM){
+  print(paste(get_name(1), 'vs', get_name(i), sep=' '))
+  print(anova(get_model(1), get_model(i)))
+}
+```
+
+Widzimy stąd, że na poziomie istotności α=0.05 jesteśmy w stanie odrzucić hipotezę H<sub>0</sub>. Oznacza to, że żaden z modeli powstałych przez wyrzucenie zmiennych mocno skorelowanych z density nie jest adekwatny.
+
+### Metoda wstecznej eliminacji i ANOVA
+
+W tym podrozdziale zastosujemy metodę wstecznej eliminacji. Polega ona na kolejnym wyrzucaniu zmiennych, które są najmniej istotne w modelu. Dzięki temu dostaniemy nowe modele. które posłużą nam do dalszej analizy.
+
+Zaznaczmy, że będziemy wyrzucać zmienne z pierwszego modelu, czyli z modelu regresji liniowej zmiennej ‘quality’ względem wszystkich zmiennych występujących w próbce uczącej.
+
+```{r}
+elim <- add_model('no acid', lm(quality ~ . - citric.acid, data = lrn), FALSE)
+anova(get_model(1), get_model(countM))
+```
+
+```{r}
+summary(get_model(countM))
+```
+
+Przed wyświetleniem podsumowania zastosowaliśmy od razu test ANOVA, żeby zweryfikować, czy mniejszy model jest adekwatny. Na poziomie istotności α=0,05 nie jesteśmy w stanie odrzucić hipotezy H0.
+
+```{r}
+add_model('no acid, no chlorides', lm(quality ~ . - citric.acid - chlorides, data = lrn), FALSE)
+anova(get_model(1), get_model(countM))
+```
+
+```{r}
+summary(get_model(countM))
+```
+
+```{r}
+add_model('no acid, no chlorides, no totalsulf', lm(quality ~ . - citric.acid - chlorides - total.sulfur.dioxide, data = lrn), FALSE)
+anova(get_model(1), get_model(countM))
+```
+
+```{r}
+summary(get_model(countM))
+```
+
+Podobna sytuacja występuje w dwóch kolejnych modelach. Nie jesteśmy w stanie już dalej odrzucać zmiennych, ponieważ na poziomie istotności α=0.05 kolejne zmienne są istotne, więc usuwanie ich nie jest sensowne.
+
+## Analiza składowych głównych
+
+W celu zbadania innego podejścia do tworzenia modelów wykorzystamy metodę składowych głównych.

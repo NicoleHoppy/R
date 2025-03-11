@@ -1633,7 +1633,14 @@ klasyfikacja</a>
 </ul></li>
 <li><a href="#modele-regresji-liniowej" id="toc-modele-regresji-liniowej"><span class="toc-section-number">2</span> Modele regresji liniowej</a>
 <ul>
-<li><a href="#modele-podstawowe" id="toc-modele-podstawowe"><span class="toc-section-number">2.1</span> Modele podstawowe</a></li>
+<li><a href="#modele-podstawowe" id="toc-modele-podstawowe"><span class="toc-section-number">2.1</span> Modele podstawowe</a>
+<ul>
+<li><a href="#anova" id="toc-anova"><span class="toc-section-number">2.1.1</span> ANOVA</a></li>
+<li><a href="#metoda-wstecznej-eliminacji-i-anova" id="toc-metoda-wstecznej-eliminacji-i-anova"><span class="toc-section-number">2.1.2</span> Metoda wstecznej eliminacji i
+ANOVA</a></li>
+</ul></li>
+<li><a href="#analiza-składowych-głównych" id="toc-analiza-składowych-głównych"><span class="toc-section-number">2.2</span> Analiza składowych
+głównych</a></li>
 </ul></li>
 </ul>
 </div>
@@ -2019,6 +2026,196 @@ kolejności.</p>
 ## Residual standard error: 0.8078 on 2425 degrees of freedom
 ## Multiple R-squared:  0.1602, Adjusted R-squared:  0.1571 
 ## F-statistic: 51.39 on 9 and 2425 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Już na pierwszy rzut oka widać, że ostatni model nie jest w żaden
+sposób konkurencyjny względem reszty modeli, biorąc pod uwagę chociażby
+skorygowany współczynnik determinacji, który jest nieporównywalnie
+mniejszy w stosunku do reszty modeli. Jednak w celu zweryfikowania, czy
+modele mniejsze są adekwatne, posłużymy się testem ANOVA.</p>
+<div id="anova" class="section level3" number="2.1.1">
+<h3><span class="header-section-number">2.1.1</span> ANOVA</h3>
+<p>Nasz test statystyczny ma postać:</p>
+<ul>
+<li>H<sub>0</sub>: mniejszy model jest adekwatny,</li>
+<li>H<sub>1</sub>: mniejszy model nie jest adekwatny.</li>
+</ul>
+<pre class="r"><code>for(i in 2:countM){
+  print(paste(get_name(1), &#39;vs&#39;, get_name(i), sep=&#39; &#39;))
+  print(anova(get_model(1), get_model(i)))
+}</code></pre>
+<pre><code>## [1] &quot;full vs no sugar&quot;
+## Analysis of Variance Table
+## 
+## Model 1: quality ~ fixed.acidity + volatile.acidity + citric.acid + residual.sugar + 
+##     chlorides + free.sulfur.dioxide + total.sulfur.dioxide + 
+##     density + pH + sulphates + alcohol
+## Model 2: quality ~ (fixed.acidity + volatile.acidity + citric.acid + residual.sugar + 
+##     chlorides + free.sulfur.dioxide + total.sulfur.dioxide + 
+##     density + pH + sulphates + alcohol) - residual.sugar
+##   Res.Df    RSS Df Sum of Sq     F    Pr(&gt;F)    
+## 1   2423 1334.8                                 
+## 2   2424 1363.7 -1   -28.959 52.57 5.559e-13 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## [1] &quot;full vs no alcohol&quot;
+## Analysis of Variance Table
+## 
+## Model 1: quality ~ fixed.acidity + volatile.acidity + citric.acid + residual.sugar + 
+##     chlorides + free.sulfur.dioxide + total.sulfur.dioxide + 
+##     density + pH + sulphates + alcohol
+## Model 2: quality ~ (fixed.acidity + volatile.acidity + citric.acid + residual.sugar + 
+##     chlorides + free.sulfur.dioxide + total.sulfur.dioxide + 
+##     density + pH + sulphates + alcohol) - alcohol
+##   Res.Df    RSS Df Sum of Sq      F    Pr(&gt;F)    
+## 1   2423 1334.8                                  
+## 2   2424 1371.0 -1   -36.297 65.891 7.501e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## [1] &quot;full vs no sugar, no alcohol&quot;
+## Analysis of Variance Table
+## 
+## Model 1: quality ~ fixed.acidity + volatile.acidity + citric.acid + residual.sugar + 
+##     chlorides + free.sulfur.dioxide + total.sulfur.dioxide + 
+##     density + pH + sulphates + alcohol
+## Model 2: quality ~ (fixed.acidity + volatile.acidity + citric.acid + residual.sugar + 
+##     chlorides + free.sulfur.dioxide + total.sulfur.dioxide + 
+##     density + pH + sulphates + alcohol) - residual.sugar - alcohol
+##   Res.Df    RSS Df Sum of Sq      F    Pr(&gt;F)    
+## 1   2423 1334.8                                  
+## 2   2425 1582.4 -2   -247.66 224.79 &lt; 2.2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>Widzimy stąd, że na poziomie istotności α=0.05 jesteśmy w stanie
+odrzucić hipotezę H<sub>0</sub>. Oznacza to, że żaden z modeli
+powstałych przez wyrzucenie zmiennych mocno skorelowanych z density nie
+jest adekwatny.</p>
+</div>
+<div id="metoda-wstecznej-eliminacji-i-anova" class="section level3" number="2.1.2">
+<h3><span class="header-section-number">2.1.2</span> Metoda wstecznej
+eliminacji i ANOVA</h3>
+<p>W tym podrozdziale zastosujemy metodę wstecznej eliminacji. Polega
+ona na kolejnym wyrzucaniu zmiennych, które są najmniej istotne w
+modelu. Dzięki temu dostaniemy nowe modele. które posłużą nam do dalszej
+analizy.</p>
+<p>Zaznaczmy, że będziemy wyrzucać zmienne z pierwszego modelu, czyli z
+modelu regresji liniowej zmiennej ‘quality’ względem wszystkich
+zmiennych występujących w próbce uczącej.</p>
+<pre class="r"><code>elim &lt;- add_model(&#39;no acid&#39;, lm(quality ~ . - citric.acid, data = lrn), FALSE)
+anova(get_model(1), get_model(countM))</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Res.Df"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["RSS"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["Df"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Sum of Sq"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["F"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"2423","2":"1334.749","3":"NA","4":"NA","5":"NA","6":"NA","_rn_":"1"},{"1":"2424","2":"1335.387","3":"-1","4":"-0.6380041","5":"1.158183","6":"0.2819497","_rn_":"2"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<pre class="r"><code>summary(get_model(countM))</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = quality ~ . - citric.acid, data = lrn)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.4668 -0.4857 -0.0355  0.4556  2.4624 
+## 
+## Coefficients:
+##                        Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)           1.090e+02  2.302e+01   4.735 2.32e-06 ***
+## fixed.acidity         4.359e-02  2.727e-02   1.599    0.110    
+## volatile.acidity     -1.934e+00  1.551e-01 -12.470  &lt; 2e-16 ***
+## residual.sugar        7.042e-02  9.744e-03   7.227 6.59e-13 ***
+## chlorides             2.955e-01  7.542e-01   0.392    0.695    
+## free.sulfur.dioxide   4.771e-03  1.204e-03   3.962 7.66e-05 ***
+## total.sulfur.dioxide -6.988e-04  5.187e-04  -1.347    0.178    
+## density              -1.089e+02  2.337e+01  -4.662 3.30e-06 ***
+## pH                    6.348e-01  1.420e-01   4.471 8.15e-06 ***
+## sulphates             5.603e-01  1.376e-01   4.073 4.79e-05 ***
+## alcohol               2.472e-01  3.003e-02   8.230 3.02e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.7422 on 2424 degrees of freedom
+## Multiple R-squared:  0.2913, Adjusted R-squared:  0.2884 
+## F-statistic: 99.63 on 10 and 2424 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Przed wyświetleniem podsumowania zastosowaliśmy od razu test ANOVA,
+żeby zweryfikować, czy mniejszy model jest adekwatny. Na poziomie
+istotności α=0,05 nie jesteśmy w stanie odrzucić hipotezy H0.</p>
+<pre class="r"><code>add_model(&#39;no acid, no chlorides&#39;, lm(quality ~ . - citric.acid - chlorides, data = lrn), FALSE)
+anova(get_model(1), get_model(countM))</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Res.Df"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["RSS"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["Df"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Sum of Sq"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["F"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"2423","2":"1334.749","3":"NA","4":"NA","5":"NA","6":"NA","_rn_":"1"},{"1":"2425","2":"1335.471","3":"-2","4":"-0.7225685","5":"0.6558476","6":"0.5190941","_rn_":"2"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<pre class="r"><code>summary(get_model(countM))</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = quality ~ . - citric.acid - chlorides, data = lrn)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.4676 -0.4855 -0.0338  0.4601  2.4582 
+## 
+## Coefficients:
+##                        Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)           1.073e+02  2.262e+01   4.744 2.22e-06 ***
+## fixed.acidity         4.182e-02  2.688e-02   1.556    0.120    
+## volatile.acidity     -1.929e+00  1.546e-01 -12.480  &lt; 2e-16 ***
+## residual.sugar        6.957e-02  9.496e-03   7.326 3.22e-13 ***
+## free.sulfur.dioxide   4.785e-03  1.204e-03   3.975 7.24e-05 ***
+## total.sulfur.dioxide -6.942e-04  5.185e-04  -1.339    0.181    
+## density              -1.072e+02  2.294e+01  -4.673 3.13e-06 ***
+## pH                    6.243e-01  1.394e-01   4.479 7.86e-06 ***
+## sulphates             5.580e-01  1.374e-01   4.061 5.05e-05 ***
+## alcohol               2.471e-01  3.003e-02   8.228 3.07e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.7421 on 2425 degrees of freedom
+## Multiple R-squared:  0.2912, Adjusted R-squared:  0.2886 
+## F-statistic: 110.7 on 9 and 2425 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>add_model(&#39;no acid, no chlorides, no totalsulf&#39;, lm(quality ~ . - citric.acid - chlorides - total.sulfur.dioxide, data = lrn), FALSE)
+anova(get_model(1), get_model(countM))</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Res.Df"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["RSS"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["Df"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Sum of Sq"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["F"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"2423","2":"1334.749","3":"NA","4":"NA","5":"NA","6":"NA","_rn_":"1"},{"1":"2426","2":"1336.458","3":"-3","4":"-1.709662","5":"1.034529","6":"0.3761285","_rn_":"2"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<pre class="r"><code>summary(get_model(countM))</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = quality ~ . - citric.acid - chlorides - total.sulfur.dioxide, 
+##     data = lrn)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.4384 -0.4894 -0.0324  0.4625  2.4664 
+## 
+## Coefficients:
+##                       Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)          1.120e+02  2.236e+01   5.006 5.95e-07 ***
+## fixed.acidity        4.112e-02  2.688e-02   1.530    0.126    
+## volatile.acidity    -1.969e+00  1.518e-01 -12.973  &lt; 2e-16 ***
+## residual.sugar       7.063e-02  9.465e-03   7.463 1.17e-13 ***
+## free.sulfur.dioxide  3.846e-03  9.785e-04   3.931 8.71e-05 ***
+## density             -1.119e+02  2.268e+01  -4.935 8.56e-07 ***
+## pH                   6.203e-01  1.394e-01   4.451 8.95e-06 ***
+## sulphates            5.426e-01  1.370e-01   3.962 7.65e-05 ***
+## alcohol              2.481e-01  3.002e-02   8.263 2.31e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.7422 on 2426 degrees of freedom
+## Multiple R-squared:  0.2907, Adjusted R-squared:  0.2884 
+## F-statistic: 124.3 on 8 and 2426 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Podobna sytuacja występuje w dwóch kolejnych modelach. Nie jesteśmy w
+stanie już dalej odrzucać zmiennych, ponieważ na poziomie istotności
+α=0.05 kolejne zmienne są istotne, więc usuwanie ich nie jest
+sensowne.</p>
+</div>
+</div>
+<div id="analiza-składowych-głównych" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Analiza składowych
+głównych</h2>
+<p>W celu zbadania innego podejścia do tworzenia modelów wykorzystamy
+metodę składowych głównych.</p>
 </div>
 </div>
 
