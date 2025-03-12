@@ -296,11 +296,13 @@ anova(get_model(pca_base), get_model(countM))
 summary(get_model(countM))
 ```
 
-Wynika stąd, że ten model także jest adekwatny, a przynajmniej wiemy, że nie jesteśmy w stanie odrzucić hipotezy H<sub>0</sub> na poziomie istotności α=0,05. Dalsze wyrzucanie zmiennych nie ma sensu, ponieważ reszta zmiennych jest jak najbardziej istotna.
+Wynika stąd, że ten model także jest adekwatny, a przynajmniej wiemy, że nie jesteśmy w stanie odrzucić hipotezy H<sub>0</sub> na poziomie istotności α = 0,05. Dalsze wyrzucanie zmiennych nie ma sensu, ponieważ reszta zmiennych jest jak najbardziej istotna.
 
 ## Diagnostyka
 
-Przyjdziemy teraz do diagnostyki naszych nowo utworzonych modeli. Przyjrzymy się statystyce Cooka, żeby wykryć obserwacje odstające, pozbyć się ich i stąd dostaniemy nowe modele. Dodatkowo policzymy procentowy udział obserwacji wpływowych. Spojrzymy też na wykresy resztowe naszych modeli i spróbujemy wyciągnąć wnioski.
+Przyjdziemy teraz do diagnostyki naszych nowo utworzonych modeli. Przyjrzymy się *statystyce Cooka (odległość Cooka)*, żeby wykryć obserwacje odstające, pozbyć się ich i stąd dostaniemy nowe modele. Dodatkowo policzymy procentowy udział obserwacji wpływowych. Spojrzymy też na wykresy resztowe naszych modeli i spróbujemy wyciągnąć wnioski.
+
+Krótkie wyjaśnienie *odległość Cooka* to miara wykorzystywana w analizie regresji, służąca do wykrywania obserwacji odstających i oszacowania ich wpływu na cały model statystyczny. 
 
 ### Obserwacje odstające
 
@@ -407,8 +409,8 @@ for(i in 1:countM){
 
 Z wykresów widzimy, że rozkład zmiennych resztowych nie jest zupełnie normalny, ale jest to łagodne odstępstwo od założenia normalności, ponadto próbka jest duża, więc może być zignorowane. Niemniej przeprowadźmy jeszcze test statystyczny Shapiro–Wilk. Ten test ma następujące hipotezy:
 
-H0: reszty mają rozkład normalny,
-H1: reszty nie mają rozkładu normalnego.
+H<sub>0</sub>: reszty mają rozkład normalny,
+H<sub>1</sub>: reszty nie mają rozkładu normalnego.
 
 ```{r}
 data.frame("Nazwa modelu" = mapply(get_name, 1:countM),

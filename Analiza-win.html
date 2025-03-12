@@ -2396,16 +2396,20 @@ anova(get_model(pca_base), get_model(countM))</code></pre>
 ## F-statistic: 105.6 on 9 and 2425 DF,  p-value: &lt; 2.2e-16</code></pre>
 <p>Wynika stąd, że ten model także jest adekwatny, a przynajmniej wiemy,
 że nie jesteśmy w stanie odrzucić hipotezy H<sub>0</sub> na poziomie
-istotności α=0,05. Dalsze wyrzucanie zmiennych nie ma sensu, ponieważ
+istotności α = 0,05. Dalsze wyrzucanie zmiennych nie ma sensu, ponieważ
 reszta zmiennych jest jak najbardziej istotna.</p>
 </div>
 <div id="diagnostyka" class="section level2" number="2.4">
 <h2><span class="header-section-number">2.4</span> Diagnostyka</h2>
 <p>Przyjdziemy teraz do diagnostyki naszych nowo utworzonych modeli.
-Przyjrzymy się statystyce Cooka, żeby wykryć obserwacje odstające,
-pozbyć się ich i stąd dostaniemy nowe modele. Dodatkowo policzymy
-procentowy udział obserwacji wpływowych. Spojrzymy też na wykresy
-resztowe naszych modeli i spróbujemy wyciągnąć wnioski.</p>
+Przyjrzymy się <em>statystyce Cooka (odległość Cooka)</em>, żeby wykryć
+obserwacje odstające, pozbyć się ich i stąd dostaniemy nowe modele.
+Dodatkowo policzymy procentowy udział obserwacji wpływowych. Spojrzymy
+też na wykresy resztowe naszych modeli i spróbujemy wyciągnąć
+wnioski.</p>
+<p>Krótkie wyjaśnienie <em>odległość Cooka</em> to miara wykorzystywana
+w analizie regresji, służąca do wykrywania obserwacji odstających i
+oszacowania ich wpływu na cały model statystyczny.</p>
 <div id="obserwacje-odstające" class="section level3" number="2.4.1">
 <h3><span class="header-section-number">2.4.1</span> Obserwacje
 odstające</h3>
@@ -2533,8 +2537,8 @@ normalny, ale jest to łagodne odstępstwo od założenia normalności,
 ponadto próbka jest duża, więc może być zignorowane. Niemniej
 przeprowadźmy jeszcze test statystyczny Shapiro–Wilk. Ten test ma
 następujące hipotezy:</p>
-<p>H0: reszty mają rozkład normalny, H1: reszty nie mają rozkładu
-normalnego.</p>
+<p>H<sub>0</sub>: reszty mają rozkład normalny, H<sub>1</sub>: reszty
+nie mają rozkładu normalnego.</p>
 <pre class="r"><code>data.frame(&quot;Nazwa modelu&quot; = mapply(get_name, 1:countM),
            &quot;p-value&quot; = mapply(function(i){ shapiro.test(get_model(i)$residuals)$p.value }, 1:countM)) </code></pre>
 <div data-pagedtable="false">
