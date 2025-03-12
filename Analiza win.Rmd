@@ -407,9 +407,12 @@ for(i in 1:countM){
 }
 ```
 
-Z wykresów widzimy, że rozkład zmiennych resztowych nie jest zupełnie normalny, ale jest to łagodne odstępstwo od założenia normalności, ponadto próbka jest duża, więc może być zignorowane. Niemniej przeprowadźmy jeszcze test statystyczny Shapiro–Wilk. Ten test ma następujące hipotezy:
+Z wykresów widzimy, że rozkład zmiennych resztowych nie jest zupełnie normalny, ale jest to łagodne odstępstwo od założenia normalności, ponadto próbka jest duża, więc może być zignorowane. Niemniej przeprowadźmy jeszcze test statystyczny Shapiro–Wilk. 
+
+Ten test ma następujące hipotezy:
 
 H<sub>0</sub>: reszty mają rozkład normalny,
+
 H<sub>1</sub>: reszty nie mają rozkładu normalnego.
 
 ```{r}
@@ -417,7 +420,7 @@ data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ shapiro.test(get_model(i)$residuals)$p.value }, 1:countM)) 
 ```
 
-Z powyższego testu wynika, że powinniśmy odrzucić hipotezę H0, czyli w żadnym modelu reszty nie mają rozkładu normalnego. Rozbieżność między testami a wykresem, może wynikać z dużej próbki, dla której niektóre testy nie są adekwatne
+Z powyższego testu wynika, że powinniśmy odrzucić hipotezę H<sub>0</sub>, czyli w żadnym modelu reszty nie mają rozkładu normalnego. Rozbieżność między testami a wykresem, może wynikać z dużej próbki, dla której niektóre testy nie są adekwatne.
 
 ### Stałość wariancji
 
@@ -438,10 +441,8 @@ for(i in 1:countM){
 
 Przeprowadźmy jeszcze test Goldfeld-Quandt o stałości wariancji.
 
-H0
-: reszty mają stałą wariancję,
-H1
-: reszty nie mają stałej wariancji.
+H<sub>0</sub>: reszty mają stałą wariancję,
+H<sub>1</sub>: reszty nie mają stałej wariancji.
 
 ```{r}
 data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
