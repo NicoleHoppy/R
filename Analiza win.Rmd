@@ -245,7 +245,7 @@ anova(get_model(1), get_model(countM))
 summary(get_model(countM))
 ```
 
-Podobna sytuacja występuje w dwóch kolejnych modelach. Nie jesteśmy w stanie już dalej odrzucać zmiennych, ponieważ na poziomie istotności α=0.05 kolejne zmienne są istotne, więc usuwanie ich nie jest sensowne.
+Podobna sytuacja występuje w dwóch kolejnych modelach. Nie jesteśmy w stanie już dalej odrzucać zmiennych, ponieważ na poziomie istotności α = 0.05 kolejne zmienne są istotne, więc usuwanie ich nie jest sensowne.
 
 ## Analiza składowych głównych
 
@@ -265,7 +265,7 @@ pca_data <- data.frame(quality = lrn$quality, pca$x)
 corrplot(cor(pca_data), type = "lower")
 ```
 
-Jak widać na wykresie dwie zmienne, które mają najmniejsze znaczenie są poniżej poziomu istotności α=0,05. Z wykresu obok odczytujemy także, że udało nam się utworzyć zbiór danych, w którym wszystkie zmienne (poza ‘quality’) są niezależne. Zastosujemy także tutaj metodę wstecznej eliminacji, żeby pozbyć się zmiennych, które są nieistotne w tym modelu.
+Jak widać na wykresie dwie zmienne, które mają najmniejsze znaczenie są poniżej poziomu istotności α = 0,05. Z wykresu obok odczytujemy także, że udało nam się utworzyć zbiór danych, w którym wszystkie zmienne (poza ‘quality’) są niezależne. Zastosujemy także tutaj metodę wstecznej eliminacji, żeby pozbyć się zmiennych, które są nieistotne w tym modelu.
 
 ## Metoda wstecznej eliminacji i ANOVA
 
@@ -285,7 +285,7 @@ anova(get_model(pca_base), get_model(countM))
 summary(get_model(countM))
 ```
 
-Jak widać model z wyrzuconym składnikiem ‘pc6’ jest jak najbardziej adekwatny. Spróbujmy wyrzucić jeszcze jeden składnik, tym razem ‘pc7’.
+Jak widać model z wyrzuconym składnikiem ‘PC6’ jest jak najbardziej adekwatny. Spróbujmy wyrzucić jeszcze jeden składnik, tym razem ‘PC7’.
 
 ```{r}
 add_model('pca no pc6, no pc7', lm(quality ~ . - PC6 - PC7, data = pca_data), TRUE)
@@ -296,7 +296,7 @@ anova(get_model(pca_base), get_model(countM))
 summary(get_model(countM))
 ```
 
-Wynika stąd, że ten model także jest adekwatny, a przynajmniej wiemy, że nie jesteśmy w stanie odrzucić hipotezy H0 na poziomie istotności α=0,05. Dalsze wyrzucanie zmiennych nie ma sensu, ponieważ reszta zmiennych jest jak najbardziej istotna.
+Wynika stąd, że ten model także jest adekwatny, a przynajmniej wiemy, że nie jesteśmy w stanie odrzucić hipotezy H<sub>0</sub> na poziomie istotności α=0,05. Dalsze wyrzucanie zmiennych nie ma sensu, ponieważ reszta zmiennych jest jak najbardziej istotna.
 
 ## Diagnostyka
 
