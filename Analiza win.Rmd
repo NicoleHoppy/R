@@ -72,7 +72,7 @@ Sprawdźmy jeszcze, czy w zbiorze wszystkie dane są podane:
 ```{r}
 (sapply(wine, function(x) {sum(is.na(x))}))
 ```
-Jak widać powyżej, nasza tabela zawiera wartości NA. Usuniemy zatem wiersze, które nie posiadają danych. Robimy to, ponieważ brak danych może obniżyć jakość późniejszej analizy danych.
+Jak widać powyżej, nasza tabela zawiera wartości NA. Usuniemy zatem wiersze, które nie posiadają danych, ponieważ w kontekście całego zbioru danych jest to marginalna ilość. Robimy to, ponieważ brak danych może obniżyć jakość późniejszej analizy danych.
 
 ```{r}
 wine_clean <- na.omit(wine) #usuwa wiersze zawierające wartości NA
@@ -138,7 +138,7 @@ Zanim utworzymy model regresji liniowej, zobaczmy jak prezentuje się wykres kor
 white_matrix <- cor(lrn)
 corrplot(white_matrix, type = "lower")
 ```
-*Korelacja* określa wzajemne powiązanie między wybranymi zmiennymi. Wyrazem liczbowym korelacji jest współczynnik korelacji (R Pearsona) zaierający się w przedziale [-1,1].
+*Korelacja* określa wzajemne powiązanie między wybranymi zmiennymi. Wyrazem liczbowym korelacji jest współczynnik korelacji (R Pearsona) zawierający się w przedziale [-1,1].
 
 Wartość dodatnia korelacji oznacza, że wraz ze wzrostem jednej cechy, następuje wzrost drugiej. Wartość ujemna natomiast określa, że wraz ze wzrostem jednej, następuje spadek drugiej cechy. W takim razie wartości najbliżej krańców przedziału wskazują największe korelacje. Z drugiej strony wartości bliżej zera wskazują na brak powiązania zmiennych.
 
@@ -146,7 +146,9 @@ Widzimy, że najbardziej skorelowaną zmienną ze zmienną ‘quality’, jest �
 
 Warto też zauważyć, że mocną wzajemną korelację wykazują zmienne ‘density’ i ‘residual.sugar’ oraz zmienne ‘alcohol’ i ‘density’. Mając na uwadze te obserwacje, stworzymy modele bez ‘residual.sugar’ i ‘alcohol’, żeby zobaczyć, jakie wyniki wtedy dostaniemy.
 
-Zastosujemy również metodę składowych głównych (PCA), żeby porównać oba podejścia.
+Zastosujemy również *metodę głównych składowych (PCA)*, żeby porównać oba podejścia.
+
+*Metoda głównych składowych (PCA)* polega na transformacji oryginalnego zbioru zmiennych na nowy zestaw nieskorelowanych ze sobą zmiennych, zwanych składowymi głównymi.
 
 # Modele regresji liniowej
 ## Modele podstawowe
@@ -186,9 +188,13 @@ for(i in 1:countM){
 }
 ```
 
-Już na pierwszy rzut oka widać, że ostatni model nie jest w żaden sposób konkurencyjny względem reszty modeli, biorąc pod uwagę chociażby skorygowany współczynnik determinacji, który jest nieporównywalnie mniejszy w stosunku do reszty modeli. Jednak w celu zweryfikowania, czy modele mniejsze są adekwatne, posłużymy się testem ANOVA.
+Już na pierwszy rzut oka widać, że ostatni model nie jest w żaden sposób konkurencyjny względem reszty modeli, biorąc pod uwagę chociażby *skorygowany współczynnik determinacji*, który jest nieporównywalnie mniejszy w stosunku do reszty modeli. Jednak w celu zweryfikowania, czy modele mniejsze są adekwatne, posłużymy się testem ANOVA.
+
+Jak chodzi o interpretację *skorygowanego współczynnika determinacji*, to przyjmuje się, że wartości bliżej zera oznacza model, który nie ma wartości predykcyjnej.
 
 ### ANOVA
+
+*ANOVA*, Analiza wariancji to rodzina modeli statystycznych i powiązanych z nimi metod estymacji i wnioskowania wykorzystywanych do analizy różnic pomiędzy średnimi w różnych populacjach, np. w zależności od jednego lub wielu działających równoczeeśnie czynników. W najprostszej formie ANOVA stanowi test statystyczny sprawdzający czy dwie lub więcej średnich w populacjach jest sobie równych.
 
 Nasz test statystyczny ma postać:
 
@@ -206,7 +212,7 @@ Widzimy stąd, że na poziomie istotności α=0.05 jesteśmy w stanie odrzucić 
 
 ### Metoda wstecznej eliminacji i ANOVA
 
-W tym podrozdziale zastosujemy metodę wstecznej eliminacji. Polega ona na kolejnym wyrzucaniu zmiennych, które są najmniej istotne w modelu. Dzięki temu dostaniemy nowe modele. które posłużą nam do dalszej analizy.
+W tym podrozdziale zastosujemy *metodę wstecznej eliminacji*. Polega ona na kolejnym wyrzucaniu zmiennych, które są najmniej istotne w modelu. Dzięki temu dostaniemy nowe modele. które posłużą nam do dalszej analizy.
 
 Zaznaczmy, że będziemy wyrzucać zmienne z pierwszego modelu, czyli z modelu regresji liniowej zmiennej ‘quality’ względem wszystkich zmiennych występujących w próbce uczącej.
 
@@ -219,7 +225,7 @@ anova(get_model(1), get_model(countM))
 summary(get_model(countM))
 ```
 
-Przed wyświetleniem podsumowania zastosowaliśmy od razu test ANOVA, żeby zweryfikować, czy mniejszy model jest adekwatny. Na poziomie istotności α=0,05 nie jesteśmy w stanie odrzucić hipotezy H0.
+Przed wyświetleniem podsumowania zastosowaliśmy od razu test ANOVA, żeby zweryfikować, czy mniejszy model jest adekwatny. Na poziomie istotności α = 0,05 nie jesteśmy w stanie odrzucić hipotezy H<sub>0</sub>.
 
 ```{r}
 add_model('no acid, no chlorides', lm(quality ~ . - citric.acid - chlorides, data = lrn), FALSE)
