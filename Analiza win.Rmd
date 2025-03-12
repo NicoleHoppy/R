@@ -442,6 +442,7 @@ for(i in 1:countM){
 Przeprowadźmy jeszcze test Goldfeld-Quandt o stałości wariancji.
 
 H<sub>0</sub>: reszty mają stałą wariancję,
+
 H<sub>1</sub>: reszty nie mają stałej wariancji.
 
 ```{r}
@@ -449,23 +450,21 @@ data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ gqtest(get_model(i))$p.value }, 1:countM)) 
 ```
 
-Widzimy, że w przypadku wszystkich modeli nie jesteśmy w stanie odrzucić hipotezy H0
- na poziomie istotności α=0,05
-, dlatego wynika stąd, ż e reszty mają stałą wariancję.
+Widzimy, że w przypadku wszystkich modeli nie jesteśmy w stanie odrzucić hipotezy H<sub>0</sub> na poziomie istotności α = 0,05, dlatego wynika stąd, że reszty mają stałą wariancję.
 
 ### Skorelowanie reszt
 
 W celu sprawdzenia, czy nasze reszty są skorelowane, posłużymy się testem Durbina-Watsona:
 
-H0: reszty nie są skorelowane,
-H1: istnieje korelacja reszt.
+H<sub>0</sub>: reszty nie są skorelowane,
+H<sub>1</sub>: istnieje korelacja reszt.
 
 ```{r}
 data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ durbinWatsonTest(get_model(i))$p }, 1:countM)) 
 ```
 
-Na podstawie przeprowadzonego testu statystycznego, nie mamy podstaw do odrzucenia hipotezy H0 o braku korelacji reszt dla każdego modelu regresji liniowej.
+Na podstawie przeprowadzonego testu statystycznego, nie mamy podstaw do odrzucenia hipotezy H<sub>0</sub> o braku korelacji reszt dla każdego modelu regresji liniowej.
 
 ## Współliniowość regresorów
 
@@ -477,7 +476,9 @@ VIF = function(i){
 }
 ```
 
-Wyliczając statystykę Variance Inflation Factor, a więc prostego testu opartego na statystyce R2, który mierzy, jaka część wariancji estymatora jest powodowana przez to, że zmienna j nie jest niezależna względem pozostałych zmiennych objaśniających w modelu regresji, jesteśmy w stanie określić współliniowość dla poszczególnych zmiennych. W każdym modelu największą miarą charakteryzują się zmienne ‘density’, ‘residual.sugar’ oraz ‘alcohol’. Możemy wywnioskować, że są to najbardziej współliniowe zmienne, natomiast nie jest to zjawisko bardzo mocno widoczne w naszym zbiorze danych. Modele bez tych parametrów są mniej współliniowe.
+Wyliczając statystykę Variance Inflation Factor, a więc prostego testu opartego na statystyce R2, który mierzy, jaka część wariancji estymatora jest powodowana przez to, że zmienna j nie jest niezależna względem pozostałych zmiennych objaśniających w modelu regresji, jesteśmy w stanie określić współliniowość dla poszczególnych zmiennych.
+
+W każdym modelu największą miarą charakteryzują się zmienne ‘density’, ‘residual.sugar’ oraz ‘alcohol’. Możemy wywnioskować, że są to najbardziej współliniowe zmienne, natomiast nie jest to zjawisko bardzo mocno widoczne w naszym zbiorze danych. Modele bez tych parametrów są mniej współliniowe.
 
 ## Miary dopasowania
 
@@ -590,7 +591,7 @@ Oraz obliczmy resztową sumę kwadratów.
 sum((pr_log11-val21)^2)
 ```
 
-Widzimy, że model jest przeciętny, więc ulepszmy go. Uprościmy model za pomocą funkcji step
+Widzimy, że model jest przeciętny, więc ulepszymy go. Uprościmy model za pomocą funkcji step.
 
 ```{r}
 o_lr = step(g.plr)
@@ -622,4 +623,8 @@ Resztowa suma kwadratów jest większa, wiec model nie jest tak dobry jak wyjśc
 
 # Podsumowanie
 
-W projekcie utworzone zostało 17 modeli regresji liniowych oraz 2 modele proporcjonalnych szans. Wśród wszystkich modeli najmniejszą wartość resztowej sumy kwadratów osiągnął model regresji liniowej, który został ostatecznie przetestowany dla zbioru testowego. Na jego podstawie określiliśmy, że model regresji liniowej jest całkiem dokładny, ponieważ próba testowa dała nam bardzo dobry wynik. Można oczywiście tworzyć następne modele, wyrzucać kolejne zmienne odstające i je analizować, jednak my postanowiliśmy ograniczyć się tylko do tych kilku modeli. Natomiast widać spory problem w tym, że regresja liniowa nie jest idealnym modelem dla naszego zbioru danych.
+W projekcie utworzone zostało 17 modeli regresji liniowych oraz 2 modele proporcjonalnych szans.
+
+Wśród wszystkich modeli najmniejszą wartość resztowej sumy kwadratów osiągnął model regresji liniowej, który został ostatecznie przetestowany dla zbioru testowego. Na jego podstawie określiliśmy, że model regresji liniowej jest całkiem dokładny, ponieważ próba testowa dała nam bardzo dobry wynik.
+
+Można oczywiście tworzyć następne modele, wyrzucać kolejne zmienne odstające i je analizować, jednak my postanowiliśmy ograniczyć się tylko do tych kilku modeli. Natomiast widać spory problem w tym, że regresja liniowa nie jest idealnym modelem dla naszego zbioru danych.
