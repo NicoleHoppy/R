@@ -82,7 +82,7 @@ Jednocześnie w powyższym zestawie danych zmienną zależną jest atrybut quali
 
 W niniejszej pracy zmienną 'quality' potraktujemy jako zmienną ilościową, rozważając modele regresji liniowej. Jednak podczas tworzenia modelu proporcjonalnych szans, zmienną ‘quality’ potraktujemy jako zmienną jakościową. Warto w tym miejscu zaznaczyć, że w celu weryfikacji hipotez będziemy zakładać poziom istotności *α = 0,05*.
 
-## Podział zbioru danych
+### 2.1 Podział zbioru danych
 
 Podzielimy nasz zbiór danych na podstawie wariantu wina - białe i czerwone. W niniejszej analizie skupimy się jedynie na przeanalizowaniu danych dot. białego wina. Dla czerwonego wariantu wina można zrobić osobną analizę, przechodząc analogicznie przez kroki, jakie wykonaliśmy dla białego wina.
 
@@ -122,7 +122,7 @@ tst <- white_numeric[I_t,] #próba testowa
 
 W ten sposób podzieliliśmy zbiór danych na trzy podzbiory, które będą nam pomocne do dalszej analizy.
 
-## Korelacja zmiennych
+### 2.2 Korelacja zmiennych
 
 Zanim utworzymy model regresji liniowej, zobaczmy jak prezentuje się wykres korelacji poszczególnych zmiennych w naszej próbie uczącej.
 
@@ -142,8 +142,8 @@ Zastosujemy również *metodę głównych składowych (PCA)*, żeby porównać o
 
 *Metoda głównych składowych (PCA)* polega na transformacji oryginalnego zbioru zmiennych na nowy zestaw nieskorelowanych ze sobą zmiennych, zwanych składowymi głównymi.
 
-# Modele regresji liniowej
-## Modele podstawowe
+## 3. Modele regresji liniowej
+### 3.1. Modele podstawowe
 
 Stworzymy modele regresji liniowej zmiennej ‘quality’ względem, odpowiednio:
 
@@ -184,7 +184,7 @@ Już na pierwszy rzut oka widać, że ostatni model nie jest w żaden sposób ko
 
 Jak chodzi o interpretację *skorygowanego współczynnika determinacji*, to przyjmuje się, że wartości bliżej zera oznacza model, który nie ma wartości predykcyjnej.
 
-### ANOVA
+#### 3.1.1 ANOVA
 
 *ANOVA*, Analiza wariancji to rodzina modeli statystycznych i powiązanych z nimi metod estymacji i wnioskowania wykorzystywanych do analizy różnic pomiędzy średnimi w różnych populacjach, np. w zależności od jednego lub wielu działających równoczeeśnie czynników. W najprostszej formie ANOVA stanowi test statystyczny sprawdzający czy dwie lub więcej średnich w populacjach jest sobie równych.
 
@@ -202,7 +202,7 @@ for(i in 2:countM){
 
 Widzimy stąd, że na poziomie istotności α=0.05 jesteśmy w stanie odrzucić hipotezę H<sub>0</sub>. Oznacza to, że żaden z modeli powstałych przez wyrzucenie zmiennych mocno skorelowanych z density nie jest adekwatny.
 
-### Metoda wstecznej eliminacji i ANOVA
+#### 3.1.2. Metoda wstecznej eliminacji i ANOVA
 
 W tym podrozdziale zastosujemy *metodę wstecznej eliminacji*. Polega ona na kolejnym wyrzucaniu zmiennych, które są najmniej istotne w modelu. Dzięki temu dostaniemy nowe modele. które posłużą nam do dalszej analizy.
 
@@ -239,7 +239,7 @@ summary(get_model(countM))
 
 Podobna sytuacja występuje w dwóch kolejnych modelach. Nie jesteśmy w stanie już dalej odrzucać zmiennych, ponieważ na poziomie istotności α = 0.05 kolejne zmienne są istotne, więc usuwanie ich nie jest sensowne.
 
-## Analiza składowych głównych
+### 3.2. Analiza składowych głównych
 
 W celu zbadania innego podejścia do tworzenia modelów wykorzystamy metodę składowych głównych.
 
@@ -259,7 +259,7 @@ corrplot(cor(pca_data), type = "lower")
 
 Jak widać na wykresie dwie zmienne, które mają najmniejsze znaczenie są poniżej poziomu istotności α = 0,05. Z wykresu obok odczytujemy także, że udało nam się utworzyć zbiór danych, w którym wszystkie zmienne (poza ‘quality’) są niezależne. Zastosujemy także tutaj metodę wstecznej eliminacji, żeby pozbyć się zmiennych, które są nieistotne w tym modelu.
 
-## Metoda wstecznej eliminacji i ANOVA
+### 3.3. Metoda wstecznej eliminacji i ANOVA
 
 Na początek tworzymy model PCA, z którego będziemy wyrzucać zmienne oraz od razu sprawdzimy, czy mniejsze modele są adekwatne względem tego modelu.
 
@@ -290,13 +290,13 @@ summary(get_model(countM))
 
 Wynika stąd, że ten model także jest adekwatny, a przynajmniej wiemy, że nie jesteśmy w stanie odrzucić hipotezy H<sub>0</sub> na poziomie istotności α = 0,05. Dalsze wyrzucanie zmiennych nie ma sensu, ponieważ reszta zmiennych jest jak najbardziej istotna.
 
-## Diagnostyka
+## 4. Diagnostyka
 
 Przyjdziemy teraz do diagnostyki naszych nowo utworzonych modeli. Przyjrzymy się *statystyce Cooka (odległość Cooka)*, żeby wykryć obserwacje odstające, pozbyć się ich i stąd dostaniemy nowe modele. Dodatkowo policzymy procentowy udział obserwacji wpływowych. Spojrzymy też na wykresy resztowe naszych modeli i spróbujemy wyciągnąć wnioski.
 
 Krótkie wyjaśnienie *odległość Cooka* to miara wykorzystywana w analizie regresji, służąca do wykrywania obserwacji odstających i oszacowania ich wpływu na cały model statystyczny. 
 
-### Obserwacje odstające
+### 4.1. Obserwacje odstające
 
 Tworzymy pomocniczą funkcję, żeby maksymalnie zautomatyzować tworzenie odległości Cooka oraz powstawanie wykresów. Pamiętamy, że za obserwację wpływową w sensie odległości Cooka uchodzą obserwacje, dla których odległość jest nie mniejsza od 1.
 
@@ -329,7 +329,7 @@ mtext("Odległość Cooka", side=3, outer=TRUE, line=-3)
 
 Z powyższych wykresów jesteśmy w stanie wywnioskować, że modele ‘no sugar’, ‘no alcohol’ oraz ‘no sugar, no alcohol’ nie mają żadnych odstających obserwacji, ponieważ odległość Cooka jest mniejsza niż 1. Pozostałe modele posiadają obserwacje odstające, dlatego za pomocą funkcji, która została stworzona na początku tego podrozdziału, automatycznie stworzone zostały nowe modele z wyrzuceniem obserwacji odstającej. Warto dodać, że żaden z modeli nie posiadał więcej niż jednej obserwacji odstającej.
 
-### Obserwacje wpływowe
+### 4.2. Obserwacje wpływowe
 
 Zajmiemy się teraz obserwacjami wpływowymi. Wyświetlimy wykresy każdego modelu wraz z linią pokazującą, od jakiego poziomu obserwacje są obserwacjami wpływowymi. W tym celu robimy funkcję, żeby po raz kolejny zautomatyzować tworzenie wykresów, ponieważ na chwilę obecną mamy ich już 17.
 
@@ -362,7 +362,7 @@ data.frame(names = mapply(get_name, 1:countM),
 
 Widzimy różne rozłożenie procentowe obserwacji wpływowych dla różnych modeli.
 
-### Wykresy resztowe
+### 4.3. Wykresy resztowe
 
 Spójrzmy jeszcze tylko na wykresy resztowe wszystkich modeli.
 
@@ -380,11 +380,10 @@ for(i in 1:countM){
 
 W każdym z modeli występuje pewne odchylanie reszt od wartości dopasowanych. Widzimy, że wykresy są bardzo podobne do siebie, a wszystkie bardziej odstające punkty zostały usunięte podczas tworzenia modeli stworzonych dzięki statystyce Cooka, co widać porównując odpowiednio modele podstawowe ze zmodyfikowanymi. Jedynie wykresy modeli ‘no alcohol’ oraz ‘no sugar, no alcohol’ znacząco różnią się od reszty wykresów.
 
-## Poprawność założeń modeli regresji liniowej
-### Normalność reszt
+## 5. Poprawność założeń modeli regresji liniowej
+### 5.1. Normalność reszt
 
 Przyjrzyjmy się najpierw wykresom.
-
 
 ```{r}
 par(mfrow = c(ceiling(countM / 4), 4))
@@ -414,7 +413,7 @@ data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
 
 Z powyższego testu wynika, że powinniśmy odrzucić hipotezę H<sub>0</sub>, czyli w żadnym modelu reszty nie mają rozkładu normalnego. Rozbieżność między testami a wykresem, może wynikać z dużej próbki, dla której niektóre testy nie są adekwatne.
 
-### Stałość wariancji
+### 5.2. Stałość wariancji
 
 W celu zbadania stałości wariancji zrobimy wykresy zależności zmiennych resztowych od odpowiednich zmiennych dopasowanych.
 
@@ -444,7 +443,7 @@ data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
 
 Widzimy, że w przypadku wszystkich modeli nie jesteśmy w stanie odrzucić hipotezy H<sub>0</sub> na poziomie istotności α = 0,05, dlatego wynika stąd, że reszty mają stałą wariancję.
 
-### Skorelowanie reszt
+### 5.3. Skorelowanie reszt
 
 W celu sprawdzenia, czy nasze reszty są skorelowane, posłużymy się testem Durbina-Watsona:
 
@@ -458,7 +457,7 @@ data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
 
 Na podstawie przeprowadzonego testu statystycznego, nie mamy podstaw do odrzucenia hipotezy H<sub>0</sub> o braku korelacji reszt dla każdego modelu regresji liniowej.
 
-## Współliniowość regresorów
+## 6. Współliniowość regresorów
 
 Aby przetestować współliniowość, posłużymy się statystyką Variance Inflation Factor.
 
@@ -472,7 +471,7 @@ Wyliczając statystykę Variance Inflation Factor, a więc prostego testu oparte
 
 W każdym modelu największą miarą charakteryzują się zmienne ‘density’, ‘residual.sugar’ oraz ‘alcohol’. Możemy wywnioskować, że są to najbardziej współliniowe zmienne, natomiast nie jest to zjawisko bardzo mocno widoczne w naszym zbiorze danych. Modele bez tych parametrów są mniej współliniowe.
 
-## Miary dopasowania
+## 7. Miary dopasowania
 
 Przed wybraniem najlepszego modelu, spójrzmy jeszcze na miary dopasowania modelu do danych.
 
@@ -485,7 +484,7 @@ data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
 
 Widzimy, że gdybyśmy mieli wybierać najlepszy model na podstawie skorygowanego współczynnika determinacji, to wybralibyśmy model ‘cook no acid, no chlorides, no totalsulf’. Jednak wybór najlepszego modelu opieramy na wyniku resztowej sumy kwadratów.
 
-## Wybór najlepszego modelu na podstawie RSS oraz jego test
+## 8. Wybór najlepszego modelu na podstawie RSS oraz jego test
 
 Stwórzmy funkcję, która pokaże odpowiednio: nazwę modelu; resztową sumę kwadratów pomiędzy obserwacjami empirycznymi z próby walidacyjnej, a przewidzianymi przez model regresji liniowej; odsetek poprawnych klasyfikacji; odsetek poprawnych klasyfikacji różniących się o co najwyżej jeden.
 
@@ -538,7 +537,7 @@ prediction_summary
 
 Widzimy, że nasz model nie jest wybitny, natomiast dobrze poradził sobie z próbą testową, przewidując ponad połowę poprawnych klasyfikacji. Możemy z tego wywnioskować, że jest to najlepszy utworzony przez nas model regresji liniowej, z drugiej jednak strony sama regresja liniowa jest obarczona dużym błędem w przewidywaniach.
 
-# Model proporcjonalnych szans
+## 9. Model proporcjonalnych szans
 
 W celu zobrazowania zmiany zmiennej quality na zmienną jakościową utworzymy model proporcjonalnych szans:
 
@@ -613,7 +612,7 @@ sum((pr_log12-val21)^2)
 
 Resztowa suma kwadratów jest większa, wiec model nie jest tak dobry jak wyjściowy, klasyfikując modele na podstawie tego kryterium, dlatego żaden z tych modeli nie jest lepszy w porównaniu z najlepszym modelem regresji liniowej.
 
-# Podsumowanie
+## 10. Podsumowanie
 
 W projekcie utworzone zostało 17 modeli regresji liniowych oraz 2 modele proporcjonalnych szans.
 
