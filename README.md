@@ -1,4 +1,4 @@
-# Analiza win
+## 1. Analiza win
 
 Zbiór danych wykorzystany do poniższej analizy pochodzi ze strony [kaggle.com](https://www.kaggle.com/datasets/shelvigarg/wine-quality-dataset/data). Jest to zbiór zawierający dane o czerwonym oraz białym wariancie wina "Vinho Verde", pochodzącego z północy Portugalii.
 
@@ -19,7 +19,7 @@ library(nortest)
 library(RColorBrewer)
 ```
 
-# Dane - ich struktura oraz klasyfikacja
+## 2. Dane - ich struktura oraz klasyfikacja
 
 Załadujmy plik winequalityN.csv oraz prześledźmy jego strukturę danych.
 
