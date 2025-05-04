@@ -1,11 +1,14 @@
 ---
-title: "Analiza zbioru danych zawierającego informacje o winach pochodzących z północy Portugalii"
+title: Analiza zbioru danych zawierającego informacje o winach pochodzących z północy
+  Portugalii
 output:
   html_document:
+    toc: true
     df_print: paged
-    toc: true #włącza spis treści
-    #toc_float: true #umożliwia przewijany spis treści
-    number_sections: true #numeruje sekcje
+  github_document:
+    df_print: paged
+    toc: true
+    number_sections: true
   pdf_document: default
 ---
 
@@ -256,8 +259,8 @@ par(mfrow = c(1, 2))
 
 pca     <- prcomp(lrn[1:11], scale. = TRUE)
 pca_var <- pca$sdev^2
-plot(pca_var / sum(pca_var), xlab = "Składowe główne",
- ylab = "Proporcja wariancji objaśnianej",
+plot(pca_var / sum(pca_var), xlab = "Principal Components",
+ ylab = "Explained variance ratio",
  type = "b")
 
 pca_data <- data.frame(quality = lrn$quality, pca$x)
@@ -313,7 +316,7 @@ cook_base = countM
 
 cook_statistics = function(name, model, ispca){
   cook <- cooks.distance(model)
-  plot(cook, xlab = "Indeksy",  ylab = paste("Odległości(", name, ")"))
+  plot(cook, xlab = "Indexes",  ylab = paste("Distance(", name, ")"))
   if(max(cook) >= 1){
     name <- paste('cook', name, sep = ' ')
     while(max(cook) >= 1){
@@ -332,7 +335,7 @@ for(i in 1:cook_base){
   cook_statistics(name, model, is_pca(i))
 }
 
-mtext("Odległość Cooka", side=3, outer=TRUE, line=-3)
+mtext("Cook’s distance", side=3, outer=TRUE, line=-3)
 ```
 
 Z powyższych wykresów jesteśmy w stanie wywnioskować, że modele ‘no sugar’, ‘no alcohol’ oraz ‘no sugar, no alcohol’ nie mają żadnych odstających obserwacji, ponieważ odległość Cooka jest mniejsza niż 1. Pozostałe modele posiadają obserwacje odstające, dlatego za pomocą funkcji, która została stworzona na początku tego podrozdziału, automatycznie stworzone zostały nowe modele z wyrzuceniem obserwacji odstającej. Warto dodać, że żaden z modeli nie posiadał więcej niż jednej obserwacji odstającej.
@@ -351,7 +354,7 @@ leverages <- mapply(function(index){
     p <- (index - 1) %% 3
     q <- ifelse((index - 1) %% 6 >= 3, 0, 1)
     par(fig = c(1/3 * p,1/3 + 1/3 * p, 0.5 * q, 0.5 + 0.5 * q), new = (index %% 6 != 1))
-    plot(lev, xlab = "Indeksy", ylab = "Obserwacje wpływowe", main = name)
+    plot(lev, xlab = "Indexes", ylab = "Influential Observations", main = name)
     abline(h = 2 * sum(lev) / nrow(model$model), col = 'red')
     lev
   }, 1:countM)
@@ -382,7 +385,7 @@ for(i in 1:countM){
   p <- (i - 1) %% 4
   q <- ifelse((i - 1) %% 8 >= 4, 0, 1)
   par(fig = c(1/4 * p, 1/4 + 1/4 * p, 0.5 * q, 0.5 + 0.5 * q), new = (i %% 8 != 1))
-  plot(model$fit, model$res, xlab="Dopasowane", ylab="Reszty", main = get_name(i))
+  plot(model$fit, model$res, xlab="Fitted", ylab="Residuals", main = get_name(i))
   abline(h = 0, col = 'red')}
 ```
 
@@ -402,7 +405,7 @@ for(i in 1:countM){
   p <- (i - 1) %% 4
   q <- ifelse((i - 1) %% 8 >= 4, 0, 1)
   par(fig = c(1/4 * p, 1/4 + 1/4 * p, 0.5 * q, 0.5 + 0.5 * q), new = (i %% 8 != 1))
-  qqnorm(rstudent(model), xlab = "Teoretyczne Kwantyle", ylab = "Studentyzowane reszty", main = get_name(i))
+  qqnorm(rstudent(model), xlab = "Theoretical quantiles", ylab = "Studentized residuals", main = get_name(i))
   abline(0,1)
 }
 ```
@@ -416,7 +419,7 @@ H<sub>0</sub>: reszty mają rozkład normalny,
 H<sub>1</sub>: reszty nie mają rozkładu normalnego.
 
 ```{r}
-data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
+data.frame("Model's name" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ shapiro.test(get_model(i)$residuals)$p.value }, 1:countM)) 
 ```
 
@@ -434,7 +437,7 @@ for(i in 1:countM){
   p <- (i - 1) %% 4
   q <- ifelse((i - 1) %% 8 >= 4, 0, 1)
   par(fig = c(1/4 * p, 1/4 + 1/4 * p, 0.5 * q, 0.5 + 0.5 * q), new = (i %% 8 != 1))
-  plot(model$fit, model$res, xlab = "Zmienne dopasowane", ylab = "Zmienne resztowe", main = get_name(i))
+  plot(model$fit, model$res, xlab = "Fitted values", ylab = "Residual values", main = get_name(i))
   abline(h = 0, col = 'red')
 }
 ```
@@ -446,7 +449,7 @@ H<sub>0</sub>: reszty mają stałą wariancję,
 H<sub>1</sub>: reszty nie mają stałej wariancji.
 
 ```{r}
-data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
+data.frame("Models name" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ gqtest(get_model(i))$p.value }, 1:countM)) 
 ```
 
@@ -460,7 +463,7 @@ H<sub>0</sub>: reszty nie są skorelowane,
 H<sub>1</sub>: istnieje korelacja reszt.
 
 ```{r}
-data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
+data.frame("Model's name" = mapply(get_name, 1:countM),
            "p-value" = mapply(function(i){ durbinWatsonTest(get_model(i))$p }, 1:countM)) 
 ```
 
@@ -472,7 +475,7 @@ Aby przetestować współliniowość, posłużymy się statystyką Variance Infl
 
 ```{r}
 VIF = function(i){
-  data.frame("Nazwa" = get_name(i), t(vif(get_model(i))))
+  data.frame("Name" = get_name(i), t(vif(get_model(i))))
 }
 ```
 
@@ -485,9 +488,9 @@ W każdym modelu największą miarą charakteryzują się zmienne ‘density’,
 Przed wybraniem najlepszego modelu, spójrzmy jeszcze na miary dopasowania modelu do danych.
 
 ```{r}
-data.frame("Nazwa modelu" = mapply(get_name, 1:countM),
-           "Skorygowany współczynnik determinacji"  = mapply(function(index){summary(get_model(index))$adj.r.squared}, 1:countM),
-           "Estymator wariancji błędów" = mapply(function(index){summary(get_model(index))$sigma}, 1:countM),
+data.frame("Model's name" = mapply(get_name, 1:countM),
+           "Adjusted R-squared"  = mapply(function(index){summary(get_model(index))$adj.r.squared}, 1:countM),
+           "Estimator of error variance" = mapply(function(index){summary(get_model(index))$sigma}, 1:countM),
            check.names = FALSE)
 ```
 
@@ -503,7 +506,7 @@ pca_tst <- as.data.frame(predict(pca, newdata = tst[1:11]))
 ```
 
 ```{r}
-prediction_summary <- data.frame(matrix(ncol = 4, nrow = 0, dimnames = list(NULL, c("Nazwa", "RSS", "Odsetek popr","Odsetek róż"))))
+prediction_summary <- data.frame(matrix(ncol = 4, nrow = 0, dimnames = list(NULL, c("Name", "RSS", "Percentage of correct predictions","Percentage of differences"))))
 ```
 
 ```{r}
@@ -536,7 +539,7 @@ Przetestujmy teraz w takim razie nasz najlepszy model.
 
 ```{r}
 prediction_summary = NULL
-prediction_summary <- data.frame(matrix(ncol = 4, nrow = 0, dimnames = list(NULL, c("Nazwa", "RSS", "odsetek popr. kl","Odsetek kl. o 1"))))
+prediction_summary <- data.frame(matrix(ncol = 4, nrow = 0, dimnames = list(NULL, c("Name", "RSS", "Percentage of correctly classified cases","Percentage of classifications off by 1 class"))))
 
 make_prediction(9, tst, pca_tst)
 
